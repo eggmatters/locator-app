@@ -1,0 +1,3 @@
+api:
+  base: https://developer.trimet.org/ws/v2/vehicles/
+  app_id: CBA9612C200C0877AA9EC1949 
