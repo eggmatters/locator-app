@@ -1,0 +1,20 @@
+{
+  "name": "locator-client",
+  "version": "1.0.0",
+  "description": "Node Express web application client consuming locator-service to display real time bus routes",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/.bin/mocha test --recursive"
+  },
+  "author": "Matthew Eggers",
+  "license": "ISC",
+  "dependencies": {
+    "express": "^4.16.3",
+    "redis": "^2.8.0"
+  },
+  "devDependencies": {
+    "chai": "^4.1.2",
+    "chai-http": "^4.0.0",
+    "mocha": "^5.2.0"
+  }
+}
