@@ -1,3 +1,5 @@
 locator-service/.nbinfo
 locator-service/node_modules/
 locator-client/node_modules/
+/locator-service/nbproject
+/locator-client/nbproject
