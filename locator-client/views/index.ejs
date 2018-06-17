@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="en">
+   <head>
+      <meta charset="utf-8">
+      <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+      <meta name="description" content="Tri-Met Transit tracker">
+      <meta name="author" content="Matthew Eggers">
+
+      <title>Bus Locator</title>
+
+      <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+      <link href="css/locator.css" rel="stylesheet">
+   </head>
+
+   <body>
+
+      <main role="main">
+         <section class="jumbotron text-center">
+            <div class="container">
+               <h1 class="jumbotron-heading">Where's My Bus?</h1>
+               <p class="lead text-muted">
+                  Enter your bus route number to display busses near you.
+               </p>
+
+            </div>
+         </section>
+      </main>
+      <form id="queue-action" action="ingest.php">
+         <input id="queue" type="hidden" name="queue" value="">
+      </form>
+      <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+      <script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
+      <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+      <script>var options = {
+          enableHighAccuracy: true,
+          timeout: 5000,
+          maximumAge: 0
+        };
+
+        function success(pos) {
+          var crd = pos.coords;
+
+          console.log('Your current position is:');
+          console.log(`Latitude : ${crd.latitude}`);
+          console.log(`Longitude: ${crd.longitude}`);
+          console.log(`More or less ${crd.accuracy} meters.`);
+        }
+        function error(err) {
+          console.warn(`ERROR(${err.code}): ${err.message}`);
+        }
+
+        navigator.geolocation.getCurrentPosition(success, error, options);
+      </script>
+   </body>
+</html>
