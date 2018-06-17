@@ -1,0 +1,19 @@
+version: '3'
+services:
+  locator:
+    build:
+      context: ./locator-service
+      dockerfile: Dockerfile
+    image: locator-service
+    ports: 
+      - 4040:80
+    volumes:
+      - ./locator-service:/app/locator-service
+    links: 
+      - redis
+  
+  redis:
+    image: redis
+    ports:
+      - 16379:6379
+    
