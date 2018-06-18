@@ -1,3 +1,8 @@
+appResponse = appResponse || "{}";
+if (appResponse === "nodata") {
+   appResponse = "{}";
+   alert("There are no buses available for your route");
+}
 var locations = JSON.parse(appResponse);
 console.log(locations);
 

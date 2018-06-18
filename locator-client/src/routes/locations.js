@@ -14,6 +14,9 @@ locations.post('/fetch', function (req, resp) {
    var url = config.api.base + 'routes/' + req.body.bus_number + '/appID/' + config.api.app_id;
    request(url).then(function (response) {
       return resp.render('locations', { routes: JSON.stringify(response) });
+   }).catch(function (err) {
+      console.log(err);
+      return resp.render('locations', { routes: "\"nodata\"" });
    });
 });
 
