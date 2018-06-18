@@ -19,7 +19,7 @@
             <div class="container">
                <h1 class="jumbotron-heading">Where's My Bus?</h1>
                <p class="lead text-muted">
-                  Enter your bus route number to display busses near you.
+                  Enter your bus route number to display buses near you.
                </p>
                <form id="locator-fetch" method="post" action="/locator/fetch">
                   <div id="locator-alert"></div>
@@ -37,8 +37,8 @@
       <script>
         $(document).ready( function() {
           $('#locator-fetch').on('submit', function(e) {
-            e.preventDefault();
             if ( isNaN( parseInt($('#bus-number').val() ) ) ) {
+              e.preventDefault();
               $('#locator-alert').html('<div class="alert alert-danger alert-dismissible" role="alert">' +
                      'You must enter a valid Bus route' +
                      '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
