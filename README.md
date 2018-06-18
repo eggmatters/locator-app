@@ -38,7 +38,10 @@ a resulting queue.
 
 The client can monitor the queue and force updates at specified intervals.
 
-This service is still in development. See integration notes below.
+This service is still in development. The locator-client currently has the responsibility of
+making API calls to Tri Met to fetch data.
+
+See integration notes below.
 
 # Installation
 
