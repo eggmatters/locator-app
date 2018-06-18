@@ -1,4 +1,0 @@
-Locator Service
-==============
-
-
