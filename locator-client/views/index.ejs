@@ -22,17 +22,32 @@
                   Enter your bus route number to display busses near you.
                </p>
                <form id="locator-fetch" method="post" action="/locator/fetch">
+                  <div id="locator-alert"></div>
                   <div class="form-group">
                      <label for="bus-number">Bus Route:</label>
                      <input type="text" class="form-control" id="bus-number" name="bus_number">
                   </div>
                   <button type="submit" class="btn btn-default">Show</button>
                </form>
-
             </div>
          </section>
       </main>
       <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+      <script>
+        $(document).ready( function() {
+          $('#locator-fetch').on('submit', function(e) {
+            e.preventDefault();
+            if ( isNaN( parseInt($('#bus-number').val() ) ) ) {
+              $('#locator-alert').html('<div class="alert alert-danger alert-dismissible" role="alert">' +
+                     'You must enter a valid Bus route' +
+                     '<button type="button" class="close" data-dismiss="alert" aria-label="Close">' +
+                        '<span aria-hidden="true">&times;</span>' +
+                     '</button></div>'
+              );
+            }
+          });
+        });
+      </script>
    </body>
 </html>
