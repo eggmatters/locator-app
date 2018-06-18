@@ -6,14 +6,12 @@ var fs      = require('fs'),
 
 const config = yaml.safeLoad(fs.readFileSync('./config/config.yml', 'utf8'));
 var locations = express.Router();
-let url = config.api.base + 'routes/';
 
 locations.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 locations.use(bodyParser.json()); // for parsing application/json
 
 locations.post('/fetch', function (req, resp) {
-   url += req.body.bus_number + '/appID/' + config.api.app_id;
-   console.log(url);
+   var url = config.api.base + 'routes/' + req.body.bus_number + '/appID/' + config.api.app_id;
    request(url).then(function (response) {
       return resp.render('locations', { routes: JSON.stringify(response) });
    });
