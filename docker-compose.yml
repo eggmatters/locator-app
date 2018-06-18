@@ -1,6 +1,6 @@
 version: '3'
 services:
-  locator:
+  locator-service:
     build:
       context: ./locator-service
       dockerfile: Dockerfile
@@ -11,7 +11,19 @@ services:
       - ./locator-service:/app/locator-service
     links: 
       - redis
-  
+      
+  locator-client:
+    build:
+      context: ./locator-client
+      dockerfile: Dockerfile
+    image: locator-client
+    ports: 
+      - 3000:3000
+    volumes:
+      - ./locator-service:/app/locator-service
+    links: 
+      - redis
+      
   redis:
     image: redis
     command: redis-server /usr/local/etc/redis/redis.conf
