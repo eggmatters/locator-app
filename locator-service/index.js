@@ -1,3 +1,7 @@
 var routes = require('./src/service');
 
-routes.getRoutes('76');
+console.log("Starting locator-service");
+routes.getRoutes('76').then( (res, err) => {
+   console.log("Putting queue items");
+   routes.putQueueItems(res);
+});

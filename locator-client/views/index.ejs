@@ -21,35 +21,18 @@
                <p class="lead text-muted">
                   Enter your bus route number to display busses near you.
                </p>
+               <form id="locator-fetch" method="post" action="/locator/fetch">
+                  <div class="form-group">
+                     <label for="bus-number">Bus Route:</label>
+                     <input type="text" class="form-control" id="bus-number" name="bus_number">
+                  </div>
+                  <button type="submit" class="btn btn-default">Show</button>
+               </form>
 
             </div>
          </section>
       </main>
-      <form id="queue-action" action="ingest.php">
-         <input id="queue" type="hidden" name="queue" value="">
-      </form>
       <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-      <script>window.jQuery || document.write('<script src="../../../../assets/js/vendor/jquery-slim.min.js"><\/script>')</script>
       <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-      <script>var options = {
-          enableHighAccuracy: true,
-          timeout: 5000,
-          maximumAge: 0
-        };
-
-        function success(pos) {
-          var crd = pos.coords;
-
-          console.log('Your current position is:');
-          console.log(`Latitude : ${crd.latitude}`);
-          console.log(`Longitude: ${crd.longitude}`);
-          console.log(`More or less ${crd.accuracy} meters.`);
-        }
-        function error(err) {
-          console.warn(`ERROR(${err.code}): ${err.message}`);
-        }
-
-        navigator.geolocation.getCurrentPosition(success, error, options);
-      </script>
    </body>
 </html>

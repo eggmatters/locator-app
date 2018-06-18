@@ -5,4 +5,4 @@ api:
 redis:
   ip: 172.21.0.1
   outgoing_queue: locations-outgoing-agent
-  incoming_queue: locations-incoming-agent
+  incoming_queue: locations-incoming-agent## YAML Template.
