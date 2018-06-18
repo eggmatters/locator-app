@@ -17,10 +17,10 @@ There are 3 services this app utilizes:
 
 ## Esri ArcGis
 
-Provided by https://developers.arcgis.com/ This is a free service provide Javascript API's
+Provided by https://developers.arcgis.com/ This is a free service which provides Javascript API's
 to access most of the features of ArcGIS software in a robust web application environment.
 
-This application loads a flat 2-dimensional map rendering the user's position location and 
+This application loads a 2-dimensional map, rendering the user's position location and 
 the locations of buses on the selected route with popup legends for each bus on the line showing
 additional details
 
@@ -73,6 +73,12 @@ make an api calls to the TriMet api on any incoming queue messages. These payloa
 then be written to the outbound queue for consumption by clients.
 
 The web-client may then establish a socket.io session with the requestor, maintaining 
-real-time updates of locations. Ideally a seamless re-rendering of the locations view layer
-will occur. 
- 
+real-time updates of locations at some specified interval. Ideally a seamless re-rendering 
+of the locations view layer will occur. 
+
+# Future Enhancements
+
+* Middleware for server-side validation
+* Additional Service integrations (nearest Stop, Arrival times, etc)
+* Enhanced view features (icons for locations, etc.)
+* Port to react-native as an application experience.
