@@ -31,7 +31,7 @@ function renderMap(origin) {
       var view = new MapView({
          container: "viewDiv", // Reference to the scene div created in step 5
          map: map, // Reference to the map object created before the scene
-         zoom: 15, // Sets zoom level based on level of detail (LOD)
+         zoom: 12, // Sets zoom level based on level of detail (LOD)
          center: [-122.762, 45.416]  // Sets center point of view using longitude,latitude
       });
 
@@ -77,10 +77,30 @@ function renderMap(origin) {
                   width: 2
                }
             };
+
+            var vehicleAttributes = {
+               Name: "Route Number: " + bus.routeNumber,
+               nextStop: bus.nextLocID,
+               info: bus.signMessageLong
+            };
             var pointGraphic = new Graphic({
                geometry: point,
-               symbol: markerSymbol
-            })
+               symbol: markerSymbol,
+               attributes: vehicleAttributes,
+               popupTemplate: {// autocasts as new PopupTemplate()
+                  title: "{Name}",
+                  content: [{
+                        type: "fields",
+                        fieldInfos: [{
+                              fieldName: "Name"
+                           }, {
+                              fieldName: "nextStop"
+                           }, {
+                              fieldName: "info"
+                           }]
+                     }]
+               }
+            });
             pointGraphics.push(pointGraphic);
          });
          return pointGraphics;
