@@ -12,7 +12,7 @@ locations.use(bodyParser.json()); // for parsing application/json
 
 locations.post('/fetch', function (req, resp) {
    var url = config.api.base + 'routes/' + req.body.bus_number + '/appID/' + config.api.app_id;
-   request(url).then(function (response) {
+   request.get(url).then(function (response) {
       return resp.render('locations', { routes: JSON.stringify(response) });
    }).catch(function (err) {
       console.log(err);
