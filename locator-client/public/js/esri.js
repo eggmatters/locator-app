@@ -37,7 +37,7 @@ function renderMap(origin) {
          container: "viewDiv", // Reference to the scene div created in step 5
          map: map, // Reference to the map object created before the scene
          zoom: 12, // Sets zoom level based on level of detail (LOD)
-         center: [-122.762, 45.416]  // Sets center point of view using longitude,latitude
+         center: [origin.longitude, origin.latitude]  // Sets center point of view using longitude,latitude
       });
 
       var point = {
