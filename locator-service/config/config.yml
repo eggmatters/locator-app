@@ -4,5 +4,5 @@ api:
   
 redis:
   ip: 172.21.0.1
-  outgoing_queue: locations-outgoing-agent
-  incoming_queue: locations-incoming-agent
+  outgoing_queue: locator-request-queue
+  incoming_queue: locator-send-queue
