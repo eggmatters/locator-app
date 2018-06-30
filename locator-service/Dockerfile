@@ -6,5 +6,7 @@ ADD . /app/locator-service
 
 WORKDIR /app/locator-service
 
+EXPOSE 8080
+
 RUN ["npm", "install"]
-CMD ["node", "index.js"]
+CMD ["npm", "run", "start"]
