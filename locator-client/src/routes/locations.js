@@ -1,28 +1,47 @@
 var fs      = require('fs'),
     express = require('express'),
     yaml    = require('js-yaml'),
+    bodyParser = require('body-parser'),
     request = require('request-promise'),
-    bodyParser = require('body-parser');
+    Queues  = require('../queues');
 
 const config = yaml.safeLoad(fs.readFileSync('./config/config.yml', 'utf8'));
+const queue = new Queues();
+var subscriber = queue.getClient();
 var locations = express.Router();
 
 locations.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
 locations.use(bodyParser.json()); // for parsing application/json
 
 locations.post('/fetch', function (req, resp) {
-   var url = config.api.base + 'routes/' + req.body.bus_number + '/appID/' + config.api.app_id;
-   request.get(url).then(function (response) {
-      return resp.render('locations', { routes: JSON.stringify(response) });
-   }).catch(function (err) {
-      console.log(err);
-      return resp.render('locations', { routes: "\"nodata\"" });
-   });
+
+   var routeNumber = req.body.bus_number;
+   //queues.pushQueueMessage(client, config.redis.routes_queue, routeNumber);
+   subscriber.subscribe(config.redis.locations_queue);
+   httpPushRequest(routeNumber);
+   return resp.render('locations', { routes: "\"nodata\"" });
 });
+
 
 locations.route('/').get(function (req, res) {
    res.render('locations');
 });
 
+function httpPushRequest(payload) {
+   //have to be linked
+   var url = 'http://172.21.0.3:8080';
+   request.post(url, {form: { route_number: payload }}).then(function () {
+
+   }).catch(function (err) {
+      console.log(err);
+      return resp.render('locations', { routes: "\"nodata\"" });
+   });
+}
+
+subscriber.on("message", function(channel, message) {
+  console.log("Got here with: " + message + " From: ", channel);
+});
+
 
 module.exports = locations;
+

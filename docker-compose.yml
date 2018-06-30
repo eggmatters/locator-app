@@ -6,7 +6,7 @@ services:
       dockerfile: Dockerfile
     image: locator-service
     ports: 
-      - 4040:80
+      - 8080:8080
     volumes:
       - ./locator-service:/app/locator-service
     links: 
@@ -20,9 +20,10 @@ services:
     ports: 
       - 3000:3000
     volumes:
-      - ./locator-service:/app/locator-service
+      - ./locator-client:/app/locator-client
     links: 
       - redis
+      - locator-service
       
   redis:
     image: redis

@@ -14,24 +14,11 @@ var Routes = function() {
    let url = config.api.base + 'routes/';
 
    function getRoutes(busNumber) {
-      const publishClient = redis.createClient({
-         'scheme': 'tcp',
-         'host': config.redis.ip,
-         'port': 6379
-      });
-
-      const subscribeClient = redis.createClient({
-         'scheme': 'tcp',
-         'host': config.redis.ip,
-         'port': 6379
-      });
-
       url += busNumber + '/appID/' + config.api.app_id;
       return request.get(url).then(function (response) {
          return response;
       });
    }
-
 
 
    return {
