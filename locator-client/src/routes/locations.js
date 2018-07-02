@@ -43,12 +43,12 @@ function httpPushRequest(payload) {
 
    }).catch(function (err) {
       console.log(err);
-      return resp.render('locations', { routes: "\"nodata\"" });
+      //return resp.render('locations', { routes: "\"nodata\"" });
    });
 }
 
 subscriber.on("message", function(channel, message) {
-  console.log("Got here with: " + message + " From: ", channel);
+  console.log("Got here From: ", channel);
 });
 
 

@@ -4,7 +4,7 @@ var fs      = require('fs'),
     Promise = require('bluebird');
 
 const config = yaml.safeLoad(fs.readFileSync('./config/config.yml', 'utf8'));
-const minutes = 1000 * 60;
+const minutes = 1000 * 30;
 
 var Queues = function(syncQueue, messageQueue, messageFn) {
 
@@ -26,19 +26,26 @@ Queues.prototype = {
    synchronizedPublish: function() {
       var now = Date.now(),
           fiveMinutes = 5 * minutes,
-          lastCalled = this.client.get(this.syncQueue) || now - fiveMinutes;
-          timeElapsed = now - lastCalled;
-
-      if (timeElapsed < (5 * minutes)) {
+          lastCalled = this.client.get(this.syncQueue);
+      console.log("LastCalled: ", lastCalled);
+      console.log("now: ", now);
+      console.log("timeElapsed: ", now - lastCalled);
+      timeElapsed = (lastCalled) ? now - lastCalled : 1;
+      this.client.get(this.syncQueue, function (err, reply) {
+         console.log("APITA NOW");
+         console.log(reply);
+      });
+      console.log("Synch Queue ", (timeElapsed));
+      if (timeElapsed > minutes) {
          console.log("done");
          return;
       }
-      console.log("Synch Queue");
+
       this.client.set(this.syncQueue, now);
       this.publishQueueMessage();
       this.asyncPublishQueueRetry()
-         .then( function() {
-            this.synchonizedPublish();
+         .then( function(self) {
+            self.synchronizedPublish();
          }).catch( function (ex) {
             return ex;
          });
@@ -50,11 +57,10 @@ Queues.prototype = {
          try {
             setTimeout(
                ( function() {
-                  console.log("Async Publish");
                   self.publishQueueMessage();
+                  resolve(self);
                }).bind(self),
-               5000)
-            resolve();
+               5000);
          } catch(ex) {
             reject(ex);
          }
