@@ -15,10 +15,11 @@ locations.use(bodyParser.json()); // for parsing application/json
 
 locations.post('/fetch', function (req, resp) {
 
-   var routeNumber = req.body.bus_number;
-   //queues.pushQueueMessage(client, config.redis.routes_queue, routeNumber);
-   subscriber.subscribe(config.redis.locations_queue);
-   httpPushRequest(routeNumber);
+   var routeNumber = req.body.bus_number,
+       locationsQueue = config.redis.locations_queue + routeNumber;
+
+   subscriber.subscribe(locationsQueue);
+   httpPushRequest({route: routeNumber});
    return resp.render('locations', { routes: "\"nodata\"" });
 });
 
@@ -30,7 +31,15 @@ locations.route('/').get(function (req, res) {
 function httpPushRequest(payload) {
    //have to be linked
    var url = 'http://172.21.0.3:8080';
-   request.post(url, {form: { route_number: payload }}).then(function () {
+
+   request({
+      method: 'POST',
+      url: url,
+      header: {
+         'content-type': 'application/json'
+      },
+      body: JSON.stringify(payload)
+   }).then(function () {
 
    }).catch(function (err) {
       console.log(err);
