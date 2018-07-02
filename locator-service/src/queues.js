@@ -33,13 +33,12 @@ Queues.prototype = {
          console.log("done");
          return;
       }
-
+      console.log("Synch Queue");
       this.client.set(this.syncQueue, now);
       this.publishQueueMessage();
       this.asyncPublishQueueRetry()
          .then( function() {
             this.synchonizedPublish();
-            return;
          }).catch( function (ex) {
             return ex;
          });
@@ -51,6 +50,7 @@ Queues.prototype = {
          try {
             setTimeout(
                ( function() {
+                  console.log("Async Publish");
                   self.publishQueueMessage();
                }).bind(self),
                5000)

@@ -14,7 +14,6 @@ var Routes = function() {
 
    function getRoutes(busNumber) {
       appUrl = url + busNumber + '/appID/' + config.api.app_id;
-      console.log("Calling: ", appUrl);
       return request.get(appUrl).then(function (response) {
          return response;
       });
