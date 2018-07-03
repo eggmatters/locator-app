@@ -5,11 +5,27 @@ var expect  = require('chai').expect,
     yaml    = require('js-yaml'),
     redis   = require('redis'),
     sinon   = require('sinon');
+    Promise = require('bluebird');
+    events  = require('events');
 
+var falsePromise = function() {
+   return new Promise( function(resolve, reject) {
+      resolve({ message: "TEST MESSAGE" });
+   });
+};
 
 describe ( 'queues module test', () => {
+   sinon.stub(redis, 'createClient').returns({});
+   var testQueue = new queues('syncQueue','messageQueue', falsePromise );
+
    it ("Should create a Redis Client", () => {
-      sinon.stub(redis, 'createClient').returns({});
-      expect(queues.getClient()).to.be.an('object');
+      expect(testQueue.getClient()).to.be.an('object');
    });
+
+   it ("Should return an Events instance", () => {
+      expect(testQueue.getEventHandler()).to.be.an('object');
+   });
+
+   it ("")
 });
+
