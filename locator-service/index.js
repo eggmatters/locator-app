@@ -2,7 +2,8 @@ var  service = require('./src/service'),
       queues = require('./src/queues'),
       yaml   = require('js-yaml'),
       fs     = require('fs'),
-      http   = require('http');
+      http   = require('http'),
+      Promise = require('bluebird');
 
 
 const config = yaml.safeLoad(fs.readFileSync('./config/config.yml', 'utf8')),
@@ -36,9 +37,19 @@ function processRequest(routeNumber) {
    const routesQueue = config.redis.routes_queue + routeNumber,
          locationsQueue = config.redis.locations_queue + routeNumber,
          getRoutes = function () {
-            return service.getRoutes(routeNumber);
+            return messageTest(routeNumber)
          }.bind(routeNumber);
 
    var queueManager = new queues(routesQueue, locationsQueue, getRoutes);
-   queueManager.synchronizedPublish();
+   var deferredClient = queueManager.getClient();
+   var redisSet = Promise.promisify( deferredClient.set, { context: deferredClient});
+   redisSet(routesQueue, Date.now()).then( function() {
+      queueManager.synchronizedPublish(true);
+   });
 }
+
+var messageTest = function(arg) {
+   return new Promise( function(resolve, reject) {
+      resolve({ message: "TEST MESSAGE" });
+   });
+};

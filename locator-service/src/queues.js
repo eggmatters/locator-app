@@ -1,10 +1,12 @@
 var fs      = require('fs'),
     yaml    = require('js-yaml'),
     redis   = require('redis'),
+    events  = require('events');
     Promise = require('bluebird');
 
+class QueueEvents extends events {};
 const config = yaml.safeLoad(fs.readFileSync('./config/config.yml', 'utf8'));
-const minutes = 1000 * 30;
+const minutes = 1000 * 60;
 
 var Queues = function(syncQueue, messageQueue, messageFn) {
 
@@ -16,6 +18,13 @@ var Queues = function(syncQueue, messageQueue, messageFn) {
       'host': config.redis.ip,
       'port': 6379
    });
+   this.queueEvents = new QueueEvents();
+
+   this.events = {
+      sync_queue_continue: "sync-queue-continue",
+      sync_queue_stop: "sync-queue-stop",
+      sync_queue_error: "sync-queue-error"
+   };
 };
 
 Queues.prototype = {
@@ -23,32 +32,45 @@ Queues.prototype = {
       return this.client;
    },
 
-   synchronizedPublish: function() {
-      var now = Date.now(),
-          fiveMinutes = 5 * minutes,
-          lastCalled = this.client.get(this.syncQueue);
-      console.log("LastCalled: ", lastCalled);
-      console.log("now: ", now);
-      console.log("timeElapsed: ", now - lastCalled);
-      timeElapsed = (lastCalled) ? now - lastCalled : 1;
-      this.client.get(this.syncQueue, function (err, reply) {
-         console.log("APITA NOW");
-         console.log(reply);
-      });
-      console.log("Synch Queue ", (timeElapsed));
-      if (timeElapsed > minutes) {
-         console.log("done");
-         return;
-      }
+   getEventHandler: function() {
+      return this.queueEvents;
+   },
 
-      this.client.set(this.syncQueue, now);
-      this.publishQueueMessage();
-      this.asyncPublishQueueRetry()
+   synchronizedPublish: function(initial) {
+      this.getSyncQueue();
+      var self = this;
+      this.queueEvents.once(this.events.sync_queue_continue, function () {
+         if (initial) {
+            self.publishQueueMessage();
+            console.log("Published initial queue Message");
+         }
+         self.asyncPublishQueueRetry()
          .then( function(self) {
             self.synchronizedPublish();
          }).catch( function (ex) {
             return ex;
          });
+      });
+   },
+
+   getSyncQueue: function() {
+      var now = Date.now(),
+          fiveMinutes = 5 * minutes,
+          self = this;
+      this.client.get(this.syncQueue, function (err, lastCalled) {
+         if (err) {
+            console.log(err);
+            self.queueEvents.emit(self.events.sync_queue_error, err);
+         }
+         var timeElapsed = now - lastCalled;
+
+         if (timeElapsed >= fiveMinutes && lastCalled !== null) {
+            console.log("emitting stop");
+            self.queueEvents.emit(self.events.sync_queue_stop);
+         } else {
+            self.queueEvents.emit(self.events.sync_queue_continue);
+         }
+      });
    },
 
    asyncPublishQueueRetry: function() {
@@ -92,7 +114,7 @@ Queues.prototype = {
          messages.push(this.hgetall(messageQueue + ':' + messageId));
       });
 
-   },
+   }
 };
 
 
