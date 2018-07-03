@@ -48,7 +48,7 @@ function httpPushRequest(payload) {
 }
 
 subscriber.on("message", function(channel, message) {
-  console.log("Got here From: ", channel);
+  console.log("Got here From: ", channel, message);
 });
 
 
