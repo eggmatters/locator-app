@@ -37,7 +37,7 @@ function processRequest(routeNumber) {
    const routesQueue = config.redis.routes_queue + routeNumber,
          locationsQueue = config.redis.locations_queue + routeNumber,
          getRoutes = function () {
-            return messageTest(routeNumber)
+            return service.getRoutes(routeNumber);
          }.bind(routeNumber);
 
    var queueManager = new queues(routesQueue, locationsQueue, getRoutes);
@@ -47,9 +47,3 @@ function processRequest(routeNumber) {
       queueManager.synchronizedPublish(true);
    });
 }
-
-var messageTest = function(arg) {
-   return new Promise( function(resolve, reject) {
-      resolve({ message: "TEST MESSAGE" });
-   });
-};
