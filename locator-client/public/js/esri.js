@@ -12,6 +12,11 @@ var options = {
   timeout: 5000,
   maximumAge: 0
 };
+var socket = io();
+
+socket.on('locations', function(locations) {
+   console.log(locations);
+});
 
 function success(pos) {
   renderMap(pos.coords);
