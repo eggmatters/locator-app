@@ -14,10 +14,12 @@ locations.use(bodyParser.urlencoded({ extended: true })); // for parsing applica
 locations.use(bodyParser.json()); // for parsing application/json
 
 locations.post('/fetch', function (req, resp) {
-
    var routeNumber = req.body.bus_number,
-       locationsQueue = config.redis.locations_queue + routeNumber;
-
+       locationsQueue = config.redis.locations_queue + routeNumber,
+       io = resp.io;
+   io.on('connection', function(socket) {
+      console.log('a user connected');
+   });
    subscriber.subscribe(locationsQueue);
    httpPushRequest({route: routeNumber});
    return resp.render('locations', { routes: "\"nodata\"" });
@@ -27,6 +29,12 @@ locations.post('/fetch', function (req, resp) {
 locations.route('/').get(function (req, res) {
    res.render('locations');
 });
+
+subscriber.on("message", function(channel, message) {
+
+});
+
+module.exports = locations;
 
 function httpPushRequest(payload) {
    //have to be linked
@@ -46,11 +54,3 @@ function httpPushRequest(payload) {
       //return resp.render('locations', { routes: "\"nodata\"" });
    });
 }
-
-subscriber.on("message", function(channel, message) {
-  console.log("Got here From: ", channel, message);
-});
-
-
-module.exports = locations;
-

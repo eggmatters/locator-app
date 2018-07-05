@@ -6,6 +6,7 @@ var express =  require('express'),
     router = express.Router();
 
 //all routes follow here:
+
 router.use('/locator', require('./locations'));
 
 module.exports = router;
