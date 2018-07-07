@@ -1,21 +1,19 @@
-//appResponse = appResponse || "{}";
-//if (appResponse === "nodata") {
-//   appResponse = "{}";
-//   alert("There are no buses available for your route");
-//}
-//var locations = JSON.parse(appResponse);
-//console.log(locations);
+
 var locations = [];
+var pointGraphics = [];
 var crd = {};
 var options = {
   enableHighAccuracy: true,
   timeout: 5000,
   maximumAge: 0
 };
+var socketEvents = new Events();
+
 var socket = io();
 
 socket.on('locations', function(locations) {
-   console.log(locations);
+   data = { locations: JSON.parse(locations), pgs: pointGraphics };
+   socketEvents.trigger('locations-update', data);
 });
 
 function success(pos) {
@@ -66,60 +64,70 @@ function renderMap(origin) {
          geometry: point,
          symbol: markerSymbol
       });
-      var pointGraphics = setGraphics([pointGraphic]);
+      view.graphics.add(pointGraphic);
+//      var pointGraphics = setGraphics([pointGraphic], {});
+//
+//      view.graphics.addMany(pointGraphics);
 
-      view.graphics.addMany(pointGraphics);
+      socketEvents.on('locations-update', function(event, data) {
+         if (data.pgs.length > 0) {
+            view.graphics.removeMany(data.pgs);
+         }
+         pointGraphics = setGraphics([], data.locations);
+         view.graphics.addMany(pointGraphics);
+      });
 
-      function setGraphics(pointGraphics) {
+      function setGraphics(pointGraphics, locations) {
          var vehicles = getVehicles(locations);
          vehicles.forEach(function (bus) {
-            var point = {
-               type: "point",
-               latitude: bus.latitude,
-               longitude: bus.longitude
-            };
+         var point = {
+            type: "point",
+            latitude: bus.latitude,
+            longitude: bus.longitude
+         };
 
-            var markerSymbol = {
-               type: "simple-marker",
-               color: [226, 119, 40],
-               outline: {
-                  color: [255, 255, 255],
-                  width: 2
-               }
-            };
+         var markerSymbol = {
+            type: "simple-marker",
+            color: [226, 119, 40],
+            outline: {
+               color: [255, 255, 255],
+               width: 2
+            }
+         };
 
-            var vehicleAttributes = {
-               Name: "Route Number: " + bus.routeNumber,
-               nextStop: bus.nextLocID,
-               info: bus.signMessageLong
-            };
-            var pointGraphic = new Graphic({
-               geometry: point,
-               symbol: markerSymbol,
-               attributes: vehicleAttributes,
-               popupTemplate: {// autocasts as new PopupTemplate()
-                  title: "{Name}",
-                  content: [{
-                        type: "fields",
-                        fieldInfos: [{
-                              fieldName: "Name"
-                           }, {
-                              fieldName: "nextStop"
-                           }, {
-                              fieldName: "info"
-                           }]
-                     }]
-               }
-            });
-            pointGraphics.push(pointGraphic);
+         var vehicleAttributes = {
+            Name: "Route Number: " + bus.routeNumber,
+            nextStop: bus.nextLocID,
+            info: bus.signMessageLong
+         };
+         var pointGraphic = new Graphic({
+            geometry: point,
+            symbol: markerSymbol,
+            attributes: vehicleAttributes,
+            popupTemplate: {// autocasts as new PopupTemplate()
+               title: "{Name}",
+               content: [{
+                     type: "fields",
+                     fieldInfos: [{
+                           fieldName: "Name"
+                        }, {
+                           fieldName: "nextStop"
+                        }, {
+                           fieldName: "info"
+                        }]
+                  }]
+            }
          });
-         return pointGraphics;
-      }
+         pointGraphics.push(pointGraphic);
+      });
+      return pointGraphics;
+   }
 
-      function getVehicles(locations) {
-         var resultSet = locations.resultSet || {};
-         var vehicles = resultSet.vehicle || [];
-         return vehicles;
-      }
+   function getVehicles(locations) {
+      var resultSet = locations.resultSet || {};
+      var vehicles = resultSet.vehicle || [];
+      return vehicles;
+   }
+
    });
 }

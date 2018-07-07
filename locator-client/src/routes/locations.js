@@ -18,12 +18,9 @@ locations.post('/fetch', function (req, resp) {
        locationsQueue = config.redis.locations_queue + routeNumber,
        io = resp.io;
 
-   io.on('connection', function(socket) {
-      console.log('a user connected');
-   });
 
    subscriber.on("message", function(channel, message) {
-      io.emit('locations', message);
+      io.emit('locations', JSON.parse(message));
    });
 
    subscriber.subscribe(locationsQueue);
