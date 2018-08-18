@@ -15,8 +15,11 @@ var falsePromise = function() {
 };
 
 describe ( 'queues module test', () => {
-   sinon.stub(redis, 'createClient').returns({});
-   var testQueue = new queues('syncQueue','messageQueue', falsePromise );
+   let testQueue;
+   before( () => {
+      sinon.stub(redis, 'createClient').returns({});
+      testQueue = new queues('syncQueue','messageQueue' );
+   });
 
    it ("Should create a Redis Client", () => {
       expect(testQueue.getClient()).to.be.an('object');
@@ -26,6 +29,5 @@ describe ( 'queues module test', () => {
       expect(testQueue.getEventHandler()).to.be.an('object');
    });
 
-   it ("")
 });
 

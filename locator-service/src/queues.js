@@ -8,11 +8,10 @@ class QueueEvents extends events {};
 const config = yaml.safeLoad(fs.readFileSync('./config/config.yml', 'utf8'));
 const minutes = 1000 * 60;
 
-var Queues = function(syncQueue, messageQueue, messageFn) {
+var Queues = function(syncQueue, messageQueue) {
 
    this.syncQueue = syncQueue;
    this.messageQueue = messageQueue;
-   this.messageFn = messageFn;
    this.client = redis.createClient({
       'scheme': 'tcp',
       'host': config.redis.ip,
@@ -21,19 +20,44 @@ var Queues = function(syncQueue, messageQueue, messageFn) {
    this.queueEvents = new QueueEvents();
 
    this.events = {
-      sync_queue_continue: "sync-queue-continue",
-      sync_queue_stop: "sync-queue-stop",
-      sync_queue_error: "sync-queue-error"
+      published_to_queue: 'published-to-queue',
+      synced_and_published: 'synced-and-published',
+      sync_queue_continue: 'sync-queue-continue',
+      sync_queue_stop: 'sync-queue-stop',
+      sync_queue_error: 'sync-queue-error'
    };
 };
 
 Queues.prototype = {
+  /**
+   *
+   * @returns {RedisClient}
+   */
    getClient: function() {
       return this.client;
    },
-
+   /**
+    *
+    * @returns {QueueEvents}
+    */
    getEventHandler: function() {
       return this.queueEvents;
+   },
+   /**
+    * @param {string} message
+    */
+   publishQueueMessage: function(message) {
+      this.client.publish(this.messageQueue, message);
+      this.queueEvents.emit(this.events.published_to_queue);
+   },
+   /**
+    * @param {string} syncMessage
+    * @param {string} publishMessage
+    */
+   setQueueMessage: function(syncMessage, publishMessage) {
+      this.client.set(this.syncQueue, syncMessage);
+      this.client.publish(this.messageQueue, publishMessage);
+      this.queueEvents.emit(this.events.synced_and_published);
    },
 
    synchronizedPublish: function(initial) {
@@ -50,49 +74,6 @@ Queues.prototype = {
          }).catch( function (ex) {
             return ex;
          });
-      });
-   },
-
-   getSyncQueue: function() {
-      var now = Date.now(),
-          fiveMinutes = 5 * minutes,
-          self = this;
-      this.client.get(this.syncQueue, function (err, lastCalled) {
-         if (err) {
-            console.log(err);
-            self.queueEvents.emit(self.events.sync_queue_error, err);
-         }
-         var timeElapsed = now - lastCalled;
-
-         if (timeElapsed >= fiveMinutes && lastCalled !== null) {
-            console.log("emitting stop");
-            self.queueEvents.emit(self.events.sync_queue_stop);
-         } else {
-            self.queueEvents.emit(self.events.sync_queue_continue);
-         }
-      });
-   },
-
-   asyncPublishQueueRetry: function() {
-      var self = this;
-      return new Promise(function(resolve, reject) {
-         try {
-            setTimeout(
-               ( function() {
-                  self.publishQueueMessage();
-                  resolve(self);
-               }).bind(self),
-               5000);
-         } catch(ex) {
-            reject(ex);
-         }
-      });
-   },
-
-   publishQueueMessage: function() {
-      var self = this;
-      this.messageFn().then( function (res) {
-         self.client.publish(self.messageQueue, JSON.stringify(res));
       });
    },
 
