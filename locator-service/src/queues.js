@@ -4,14 +4,11 @@ var fs      = require('fs'),
     events  = require('events');
     Promise = require('bluebird');
 
-class QueueEvents extends events {};
 const config = yaml.safeLoad(fs.readFileSync('./config/config.yml', 'utf8'));
-const minutes = 1000 * 60;
+class QueueEvents extends events {};
 
-var Queues = function(syncQueue, messageQueue) {
+var Queues = function() {
 
-   this.syncQueue = syncQueue;
-   this.messageQueue = messageQueue;
    this.client = redis.createClient({
       'scheme': 'tcp',
       'host': config.redis.ip,
@@ -21,11 +18,13 @@ var Queues = function(syncQueue, messageQueue) {
 
    this.events = {
       published_to_queue: 'published-to-queue',
-      synced_and_published: 'synced-and-published',
-      sync_queue_continue: 'sync-queue-continue',
-      sync_queue_stop: 'sync-queue-stop',
+      sync_queue_set: 'sync-queue-set',
+      sync_queue_expired: 'sync-queue-expired',
       sync_queue_error: 'sync-queue-error'
    };
+   this.client.on("error", function (err) {
+     console.log("RedisClient Error:", err);
+   });
 };
 
 Queues.prototype = {
@@ -44,37 +43,62 @@ Queues.prototype = {
       return this.queueEvents;
    },
    /**
-    * @param {string} message
+    * Returns events object keyvalue pairs
+    * @returns {Object}
     */
-   publishQueueMessage: function(message) {
-      this.client.publish(this.messageQueue, message);
-      this.queueEvents.emit(this.events.published_to_queue);
+   getEvents: function() {
+     return this.events
    },
    /**
-    * @param {string} syncMessage
-    * @param {string} publishMessage
+    * Sets a route with supplied message & expiration (ttl)
+    * @param  {String} message
+    * @param  {integer} timeToLive     [description]
+    * @return {string|Boolean}         [description]
     */
-   setQueueMessage: function(syncMessage, publishMessage) {
-      this.client.set(this.syncQueue, syncMessage);
-      this.client.publish(this.messageQueue, publishMessage);
-      this.queueEvents.emit(this.events.synced_and_published);
+   setSyncQueue: function(syncQueue, message, timeToLive) {
+     var self = this;
+     this.client.set(syncQueue, message, 'EX', timeToLive, 'NX', (err, resp) => {
+       if (err) {
+         console.log("SetSyncQueue Error", err);
+         return;
+       }
+       console.log("Response from sync queue? (should be 'OK'):", resp);
+       self.queueEvents.emit(self.events.sync_queue_set);
+     });
+   },
+   /**
+    * wraps a call to redis PUBLISH
+    * @see https://redis.io/commands/publish
+    *
+    * @emits this.events.published_to_queue
+    *
+    * @param  {string} messageQueue [description]
+    * @param  {string} message      [description]
+    */
+   publishQueueMessage: function(messageQueue, message) {
+      var self = this;
+      this.client.publish(messageQueue, message, (err, resp) => {
+        if (err) {
+          console.log(err);
+          return;
+        }
+        self.queueEvents.emit(self.events.published_to_queue);
+      });
    },
 
-   synchronizedPublish: function(initial) {
-      this.getSyncQueue();
-      var self = this;
-      this.queueEvents.once(this.events.sync_queue_continue, function () {
-         if (initial) {
-            self.publishQueueMessage();
-            console.log("Published initial queue Message");
-         }
-         self.asyncPublishQueueRetry()
-         .then( function(self) {
-            self.synchronizedPublish();
-         }).catch( function (ex) {
-            return ex;
-         });
-      });
+   /**
+    * [description]
+    * @emits this.events.sync_queue_expired
+    */
+   isQueuExpiredSet: function(queue) {
+     console.log("queue check2:", queue);
+     var self = this;
+     this.client.exists(queue, (err, resp) => {
+       console.log("RESP:", resp);
+       if (resp <= 0) {
+         self.queueEvents.emit(self.events.sync_queue_expired);
+       }
+     })
    },
 
    pushQueueMessage: function(messageQueue, message) {
@@ -94,7 +118,6 @@ Queues.prototype = {
       messageIds.forEach( (messageId) => {
          messages.push(this.hgetall(messageQueue + ':' + messageId));
       });
-
    }
 };
 
