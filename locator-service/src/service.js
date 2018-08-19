@@ -14,41 +14,38 @@ const url = config.api.base + 'routes/';
  * Calls api to retrieve routes and puts data on queues.
  *
  * @param {string} route
- * @returns {BusFinderService}
  */
 BusFinderService = function(route) {
    this.route = route;
    this.syncQueue = config.redis.routes_queue + route;
    this.routesQueue = config.redis.locations_queue + route;
-   this.queues = new queues(this.syncQueue, this.routesQueue);
-   console.log("queues are: ", this.syncQueue, this.routesQueue)
+   this.queues = new queues();
+   this.queueEvents = this.queues.getEvents();
+   this.queueEventHandler = this.queues.getEventHandler();
 };
 
 
 BusFinderService.prototype = {
   initiateQueuesWithRetry: function(timeToLive, retryTimeout) {
-     if (this.isRouteSet()) {
-       console.log("no queues. queues are done");
-       return;
-     }
-     console.log("Doing the thing");
-     this.setRouteSyncQueue(Date.now(), timeToLive);
-     this.publishAndSetQueue();
-     var self = this;
+     let routeHandler;
+     this.sendMessage(this.syncQueue, timeToLive);
+     this.queueEventHandler.on(this.queueEvents.sync_queue_set, () => {
+       routeHandler = this.publishRoutesQueue(retryTimeout);
+     });
+     this.queueEventHandler.on(this.queueEvents.sync_queue_expired, () => {
+       console.log("Clearing publish queue");
+       clearInterval(routeHandler);
+     })
+  },
 
-     while(this.isRouteSet()) {
-       try {
-         setTimeout(( function() {
-            console.log("IN TIMEOUT");
-            self.publishQueueMessage();
-            resolve(self);
-         }).bind(self),
-         retryTimeout);
-       } catch(ex) {
-          console.log("Error handling request:", ex);
-       }
-     }
-     console.log("Done doing this thing. :(");
+  publishRoutesQueue: function(retryTimeout) {
+    var self = this;
+    var routesPublish = setInterval( function() {
+       console.log("IN TIMEOUT");
+       self.queues.isQueuExpiredSet(self.syncQueue);
+       self.sendMessage(self.routesQueue);
+    }, retryTimeout);
+    return routesPublish;
   },
 	/**
     * makes an API call to fetch the routes.
@@ -59,20 +56,13 @@ BusFinderService.prototype = {
       var rv = request.get(appUrl);
       return rv;
    },
-   /**
-    * Sets a route with supplied message & expiration (ttl)
-    * @param  {String} message
-    * @param  {integer} ttl     [description]
-    * @return {string|Boolean}         [description]
-    */
-   setRouteSyncQueue: function(message, ttl) {
-     var meh = this.queues.getClient().set(this.syncQueue, message, 'EX', ttl, 'NX');
-     console.log("Set returns:", meh);
-     var resp = this.queues.getClient().get(this.syncQueue);
-     console.log("Shoulda set the thing:", resp);
-   },
 
-   publishAndSetQueue: function() {
+   /**
+    * [description]
+    * @param  {string} queue               [description]
+    * @param  {routeNumber} [timeToLive=false;] [description]
+    */
+   sendMessage: function(queue, timeToLive = false) {
      var self = this;
      this.getRoutes().then( function(resolve, reject) {
        if (reject) {
@@ -80,28 +70,24 @@ BusFinderService.prototype = {
          return;
        }
        var message = (typeof resolve === 'string') ? resolve : JSON.stringify(resolve);
-       self.queues.setQueueMessage(message, message);
+       if (timeToLive) {
+         self.queues.setSyncQueue(self.syncQueue, message, timeToLive);
+         return;
+       }
+       self.queues.publishQueueMessage(self.routesQueue, message);
      });
-   },
-   /**
-    * [description]
-    * @return {Boolean} [description]
-    */
-   isRouteSet: function() {
-     var dbg = this.queues.getClient();
-     console.log("SYNCQUEREFS:", dbg.object('refcount', this.syncQueue));
-     console.log("ROUTESQUEUE:", dbg.object('refcount', this.routesQueue));
-     return this.queues.getClient().exists(this.syncQueue) > 0;
    },
 
+
    queueDebug: function() {
-     var queueEventHandler = this.queues.getEventHandler();
-     var queueEvents = this.queues.events;
-     queueEventHandler.on(queueEvents.synced_and_published, () => {
-       console.log("QueueEvent Synced and published");
+     this.queueEventHandler.on(this.queueEvents.sync_queue_expired, () => {
+       console.log("queue expired");
      });
-     queueEventHandler.on(queueEvents.published_to_queue, () => {
-       console.log("published to queue");
+     this.queueEventHandler.on(this.queueEvents.sync_queue_set, () => {
+       console.log("sync queue is now set");
+     });
+     this.queueEventHandler.on(this.queueEvents.published_to_queue, () => {
+       console.log("published to the queue");
      });
 
    }

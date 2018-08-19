@@ -35,7 +35,7 @@ function processRequest(routeNumber) {
   console.log("Got here");
    var routesService = new service(routeNumber);
    routesService.queueDebug();
-   routesService.initiateQueuesWithRetry(60, 5000);
+   routesService.initiateQueuesWithRetry(15, 5000);
 };
 
 
