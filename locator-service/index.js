@@ -6,7 +6,9 @@ var  service = require('./src/service'),
 
 const config = yaml.safeLoad(fs.readFileSync('./config/config.yml', 'utf8')),
       //client = (new queues()).getClient(),
-      port = 8080;
+      port = 8080,
+      timeToLive = 300,
+      retryTimeout = 5000;
 
 const requestHandler = (request, response) => {
    let body = [],
@@ -32,7 +34,6 @@ server.listen(port, (err) => {
 });
 
 function processRequest(routeNumber) {
-  console.log("Got here");
    var routesService = new service(routeNumber);
    routesService.queueDebug();
    routesService.initiateQueuesWithRetry(15, 5000);

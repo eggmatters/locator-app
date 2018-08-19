@@ -91,11 +91,9 @@ Queues.prototype = {
     * @emits this.events.sync_queue_expired
     */
    isQueuExpiredSet: function(queue) {
-     console.log("queue check2:", queue);
      var self = this;
      this.client.exists(queue, (err, resp) => {
-       console.log("RESP:", resp);
-       if (resp <= 0) {
+       if (err || resp <= 0) {
          self.queueEvents.emit(self.events.sync_queue_expired);
        }
      })

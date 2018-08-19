@@ -41,7 +41,6 @@ BusFinderService.prototype = {
   publishRoutesQueue: function(retryTimeout) {
     var self = this;
     var routesPublish = setInterval( function() {
-       console.log("IN TIMEOUT");
        self.queues.isQueuExpiredSet(self.syncQueue);
        self.sendMessage(self.routesQueue);
     }, retryTimeout);
