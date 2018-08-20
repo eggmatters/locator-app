@@ -7,7 +7,7 @@ var fs      = require('fs'),
 
 const config = yaml.safeLoad(fs.readFileSync('./config/config.yml', 'utf8'));
 const queue = new Queues();
-var subscriber = queue.getClient();
+var queueClient = queue.getClient();
 var locations = express.Router();
 
 locations.use(bodyParser.urlencoded({ extended: true })); // for parsing application/x-www-form-urlencoded
@@ -19,11 +19,11 @@ locations.post('/fetch', function (req, resp) {
        io = resp.io;
 
 
-   subscriber.on("message", function(channel, message) {
+   queueClient.on("message", function(channel, message) {
       io.emit('locations', JSON.parse(message));
    });
 
-   subscriber.subscribe(locationsQueue);
+   queueClient.subscribe(locationsQueue);
    httpPushRequest({route: routeNumber});
    return resp.render('locations', { routes: "\"nodata\"" });
 });
@@ -52,4 +52,8 @@ function httpPushRequest(payload) {
       console.log(err);
       //return resp.render('locations', { routes: "\"nodata\"" });
    });
+}
+
+function fetchQueueData() {
+
 }

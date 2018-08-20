@@ -18,6 +18,7 @@ var Queues = function() {
 
    this.events = {
       published_to_queue: 'published-to-queue',
+      data_queue_set: 'data-queue-set',
       sync_queue_set: 'sync-queue-set',
       sync_queue_expired: 'sync-queue-expired',
       sync_queue_error: 'sync-queue-error'
@@ -87,10 +88,27 @@ Queues.prototype = {
    },
 
    /**
+    * Sets message data on queue
+    * @param  {string} messageQueue [description]
+    * @param  {string} message      [description]
+    * @emits this.events.data_queue_set
+    */
+   setQueueData: function(messageQueue, message) {
+     var self = this;
+     this.client.set(messageQueue, message, (err, resp) => {
+       if (err) {
+         console.log(err);
+         return;
+       }
+       self.queueEvents.emit(self.events.data_queue_set);
+     });
+   },
+
+   /**
     * [description]
     * @emits this.events.sync_queue_expired
     */
-   isQueuExpiredSet: function(queue) {
+   isQueueExpired: function(queue) {
      var self = this;
      this.client.exists(queue, (err, resp) => {
        if (err || resp <= 0) {
