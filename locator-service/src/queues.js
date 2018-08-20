@@ -77,14 +77,17 @@ Queues.prototype = {
     * @param  {string} message      [description]
     */
    publishQueueMessage: function(messageQueue, message) {
-      var self = this;
-      this.client.publish(messageQueue, message, (err, resp) => {
-        if (err) {
-          console.log(err);
-          return;
-        }
-        self.queueEvents.emit(self.events.published_to_queue);
-      });
+     var self = this;
+     return new Promise(function(resolve, reject) {
+       self.client.publish(messageQueue, message, (err, resp) => {
+         if (err) {
+           console.log(err);
+           reject(err);
+         }
+         self.queueEvents.emit(self.events.published_to_queue);
+         resolve();
+       });
+     });
    },
 
    /**
@@ -92,15 +95,19 @@ Queues.prototype = {
     * @param  {string} messageQueue [description]
     * @param  {string} message      [description]
     * @emits this.events.data_queue_set
+    * @return {Promise}
     */
    setQueueData: function(messageQueue, message) {
      var self = this;
-     this.client.set(messageQueue, message, (err, resp) => {
-       if (err) {
-         console.log(err);
-         return;
-       }
-       self.queueEvents.emit(self.events.data_queue_set);
+     return new Promise(function (resolve, reject) {
+       self.client.set(messageQueue, message, (err, resp) => {
+         if (err) {
+           console.log(err);
+           reject(err);
+         }
+         self.queueEvents.emit(self.events.data_queue_set);
+         resolve();
+       });
      });
    },
 

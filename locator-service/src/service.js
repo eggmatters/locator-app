@@ -72,7 +72,13 @@ BusFinderService.prototype = {
        if (timeToLive) {
          self.queues.setSyncQueue(self.syncQueue, Date.now().toString(), timeToLive);
        }
-       self.queues.setQueueData(self.dataQueue, message)
+       self.queues.setQueueData(self.dataQueue, message).then( function(resolve, reject) {
+         if (reject) {
+           console.log("Receieved error from data queue:", reject);
+         }
+         self.queues.publishQueueMessage(self.publishQueue, message);
+       }
+      );
      });
    },
 
