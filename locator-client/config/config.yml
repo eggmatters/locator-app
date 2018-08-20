@@ -1,9 +1,9 @@
 api:
   base: https://developer.trimet.org/ws/v2/vehicles/
   app_id: CBA9612C200C0877AA9EC1949
-  
+
 redis:
   ip: 172.21.0.1
-  routes_queue: locator-routes-
+  routes_queue: "locator-routes:"
   # locator service shall append route number to response queue.
-  locations_queue: locator-response-
+  locations_queue: "locator-response:"

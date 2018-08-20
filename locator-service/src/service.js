@@ -17,8 +17,9 @@ const url = config.api.base + 'routes/';
  */
 BusFinderService = function(route) {
    this.route = route;
-   this.syncQueue = config.redis.routes_queue + route;
-   this.routesQueue = config.redis.locations_queue + route;
+   this.syncQueue = config.redis.sync_queue + route;
+   this.publishQueue = config.redis.publish_queue + route;
+   this.dataQueue = config.redis.data_queue + route;
    this.queues = new queues();
    this.queueEvents = this.queues.getEvents();
    this.queueEventHandler = this.queues.getEventHandler();
@@ -28,7 +29,7 @@ BusFinderService = function(route) {
 BusFinderService.prototype = {
   initiateQueuesWithRetry: function(timeToLive, retryTimeout) {
      let routeHandler;
-     this.sendMessage(this.syncQueue, timeToLive);
+     this.sendMessage(timeToLive);
      this.queueEventHandler.on(this.queueEvents.sync_queue_set, () => {
        routeHandler = this.publishRoutesQueue(retryTimeout);
      });
@@ -41,8 +42,8 @@ BusFinderService.prototype = {
   publishRoutesQueue: function(retryTimeout) {
     var self = this;
     var routesPublish = setInterval( function() {
-       self.queues.isQueuExpiredSet(self.syncQueue);
-       self.sendMessage(self.routesQueue);
+       self.queues.isQueueExpired(self.syncQueue);
+       self.sendMessage();
     }, retryTimeout);
     return routesPublish;
   },
@@ -58,10 +59,9 @@ BusFinderService.prototype = {
 
    /**
     * [description]
-    * @param  {string} queue               [description]
     * @param  {routeNumber} [timeToLive=false;] [description]
     */
-   sendMessage: function(queue, timeToLive = false) {
+   sendMessage: function(timeToLive = false) {
      var self = this;
      this.getRoutes().then( function(resolve, reject) {
        if (reject) {
@@ -70,10 +70,9 @@ BusFinderService.prototype = {
        }
        var message = (typeof resolve === 'string') ? resolve : JSON.stringify(resolve);
        if (timeToLive) {
-         self.queues.setSyncQueue(self.syncQueue, message, timeToLive);
-         return;
+         self.queues.setSyncQueue(self.syncQueue, Date.now().toString(), timeToLive);
        }
-       self.queues.publishQueueMessage(self.routesQueue, message);
+       self.queues.setQueueData(self.dataQueue, message)
      });
    },
 
@@ -88,6 +87,9 @@ BusFinderService.prototype = {
      this.queueEventHandler.on(this.queueEvents.published_to_queue, () => {
        console.log("published to the queue");
      });
+     this.queueEventHandler.on(this.queueEvents.data_queue_set, () => {
+       console.log("data queue set");
+     })
 
    }
 };

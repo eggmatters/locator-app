@@ -4,6 +4,11 @@ api:
 
 redis:
   ip: 172.21.0.1
-  routes_queue: "locator-routes:"
-  # locator service shall append route number to response queue.
-  locations_queue: "locator-response:"
+  sync_queue: "locator-sync:"
+  publish_queue: "locator-publish:"
+  data_queue: "locator-data:"
+
+  publish_states:
+    queue_started: "queue started"
+    message_published: "message published"
+    queue_expired: "queue expired"
