@@ -12,13 +12,31 @@ var Queues = function() {
       'host': config.redis.ip,
       'port': 6379
    });
-   this.syncQueue = config.redis.routes_queue;
-   this.routesQueue = config.redis.locations_queue;
+   this.dataQueue = config.redis.data_queue;
+   this.subscribe = config.redis.publish_queue;
 };
 
 Queues.prototype = {
-   getClient() {
+  /**
+   * [description]
+   * @return {string} [description]
+   */
+   getClient: function() {
       return this.client;
+   },
+   /**
+    * [description]
+    * @return {string} [description]
+    */
+   getDataQueue: function() {
+      return this.dataQueue;
+   },
+   /**
+    * [description]
+    * @return {string} [description]
+    */
+   getSubscribeQueue: function() {
+     return this.subscribe;
    }
 }
 

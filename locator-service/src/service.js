@@ -36,7 +36,7 @@ BusFinderService.prototype = {
      this.queueEventHandler.on(this.queueEvents.sync_queue_expired, () => {
        console.log("Clearing publish queue");
        clearInterval(routeHandler);
-     })
+     });
   },
 
   publishRoutesQueue: function(retryTimeout) {
@@ -76,7 +76,7 @@ BusFinderService.prototype = {
          if (reject) {
            console.log("Receieved error from data queue:", reject);
          }
-         self.queues.publishQueueMessage(self.publishQueue, message);
+         self.queues.publishQueueMessage(self.publishQueue, config.redis.publish_states.message_published);
        }
       );
      });
@@ -95,8 +95,14 @@ BusFinderService.prototype = {
      });
      this.queueEventHandler.on(this.queueEvents.data_queue_set, () => {
        console.log("data queue set");
-     })
-
+     });
+   },
+   /**
+    * [description]
+    * @return {pushQueueMessage} [description]
+    */
+   getQueues: function() {
+     return this.queues;
    }
 };
 
