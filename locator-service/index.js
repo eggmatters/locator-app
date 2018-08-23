@@ -14,13 +14,21 @@ const requestHandler = (request, response) => {
    let body = [],
        routeNumber = {};
    request.on('data', (chunk) => {
-      body.push(chunk);
+     body.push(chunk);
    }).on('end', () => {
       body = Buffer.concat(body).toString();
-      routeNumber = JSON.parse(body);
-      processRequest(routeNumber.route);
+      var routeNumber = JSON.parse(body),
+          routesService = new service(routeNumber.route),
+          routesServiceQueues = routesService.getQueues();
+      routesService.queueDebug();
+      routesService.initiateQueuesWithRetry(60, 5000);
+      routesServiceQueues.getEventHandler().on(routesServiceQueues.getEvents().sync_queue_set, () => {
+        routesServiceQueues.getClient().get(config.redis.data_queue, function (err, resp) {
+          console.log("Sending:", resp);
+          response.end(resp);
+        });
+      });
    });
-   response.end('Publishing to queue.');
 };
 
 const server = http.createServer(requestHandler);
@@ -34,9 +42,7 @@ server.listen(port, (err) => {
 });
 
 function processRequest(routeNumber) {
-   var routesService = new service(routeNumber);
-   routesService.queueDebug();
-   routesService.initiateQueuesWithRetry(60, 5000);
+
 };
 
 
