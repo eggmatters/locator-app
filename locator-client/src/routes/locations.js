@@ -17,15 +17,14 @@ locations.post('/fetch', (req, resp) => {
        data = dataQueue.getDataQueue() + routeNumber,
        subscribe = subscribeQueue.getSubscribeQueue() + routeNumber,
        io = resp.io;
-   console.log("Data queue set", data);
+
    subscribeClient.on("message", (channel, publish_message) => {
      console.log("Got subsribed publish_message: ", publish_message, channel);
       dataClient.get(data, function(err, resp) {
         if (err) {
-          console.log("Err fetched from the thing:", err);
+          console.log("Returned error:", err);
           return;
         }
-        console.log("Got subsribed data:", resp);
         io.emit('locations', JSON.parse(resp));
       });
 
