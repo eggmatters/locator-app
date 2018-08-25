@@ -22,9 +22,9 @@ const requestHandler = (request, response) => {
           routesServiceQueues = routesService.getQueues();
       routesService.queueDebug();
       routesService.initiateQueuesWithRetry(60, 5000);
-      routesServiceQueues.getEventHandler().on(routesServiceQueues.getEvents().sync_queue_set, () => {
+      routesServiceQueues.getEventHandler().on(routesServiceQueues.getEvents().data_queue_set, () => {
         routesServiceQueues.getClient().get(config.redis.data_queue, function (err, resp) {
-          console.log("Sending:", resp);
+          console.log("Sending:", resp, err);
           response.end(resp);
         });
       });
