@@ -7,7 +7,7 @@ var  service = require('./src/service'),
 const config = yaml.safeLoad(fs.readFileSync('./config/config.yml', 'utf8')),
       //client = (new queues()).getClient(),
       port = 8080,
-      timeToLive = 300,
+      timeToLive = 15,//300 for 5 minutes
       retryTimeout = 5000;
 
 const requestHandler = (request, response) => {
@@ -21,10 +21,9 @@ const requestHandler = (request, response) => {
           routesService = new service(routeNumber.route),
           routesServiceQueues = routesService.getQueues();
       routesService.queueDebug();
-      routesService.initiateQueuesWithRetry(60, 5000);
+      routesService.initiateQueuesWithRetry(timeToLive, retryTimeout);
       routesServiceQueues.getEventHandler().on(routesServiceQueues.getEvents().data_queue_set, () => {
-        routesServiceQueues.getClient().get(config.redis.data_queue, function (err, resp) {
-          console.log("Sending:", resp, err);
+        routesServiceQueues.getClient().get(config.redis.data_queue + routeNumber.route, function (err, resp) {
           response.end(resp);
         });
       });
@@ -40,10 +39,3 @@ server.listen(port, (err) => {
 
   console.log(`server is listening on ${port}`);
 });
-
-function processRequest(routeNumber) {
-
-};
-
-
-processRequest(76);
