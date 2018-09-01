@@ -7,8 +7,8 @@ var  service = require('./src/service'),
 const config = yaml.safeLoad(fs.readFileSync('./config/config.yml', 'utf8')),
       //client = (new queues()).getClient(),
       port = 8080,
-      timeToLive = 15,//300 for 5 minutes
-      retryTimeout = 5000;
+      timeToLive = 300, //seconds for REDIS expiry
+      retryTimeout = 5000; //millis for setInterval()
 
 const requestHandler = (request, response) => {
    let body = [],

@@ -1,5 +1,5 @@
 
-var locations = [];
+var locations = appResponse || {};
 var pointGraphics = [];
 var crd = {};
 var options = {
@@ -12,7 +12,7 @@ var socketEvents = new Events();
 var socket = io();
 
 socket.on('locations', function(locations) {
-   data = { locations: JSON.parse(locations), pgs: pointGraphics };
+   data = { locations: locations, pgs: pointGraphics };
    socketEvents.trigger('locations-update', data);
 });
 
@@ -65,13 +65,16 @@ function renderMap(origin) {
          symbol: markerSymbol
       });
       view.graphics.add(pointGraphic);
-//      var pointGraphics = setGraphics([pointGraphic], {});
-//
-//      view.graphics.addMany(pointGraphics);
+      var pointGraphics = setGraphics([pointGraphic], locations);
+
+      view.graphics.addMany(pointGraphics);
 
       socketEvents.on('locations-update', function(event, data) {
          if (data.pgs.length > 0) {
             view.graphics.removeMany(data.pgs);
+         }
+         if (pointGraphics.length > 0) {
+           view.graphics.removeMany(pointGraphics);
          }
          pointGraphics = setGraphics([], data.locations);
          view.graphics.addMany(pointGraphics);

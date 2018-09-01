@@ -32,7 +32,6 @@ locations.post('/fetch', (req, resp) => {
 
    subscribeClient.subscribe(subscribe);
    httpPushRequest({route: routeNumber}).then( (response) => {
-     console.log("Got response:", response);
      return resp.render('locations', { routes: response });
    }).catch(function (err) {
       console.log(err);
