@@ -2,5 +2,7 @@ locator-service/.nbinfo
 locator-client/.nbinfo
 locator-service/node_modules/
 locator-client/node_modules/
-/locator-service/nbproject
-/locator-client/nbproject
+locator-service/nbproject
+locator-client/nbproject
+.tern-project
+xde
