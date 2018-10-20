@@ -1,15 +1,35 @@
 import React from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import {
+    Text
+  , View
+  , StyleSheet
+  , TextInput
+  , Button
+} from 'react-native';
 
 export default class App extends React.Component {
+
   render() {
+    let stub = () => {};
     return (
       <View style={styles.container}>
-        <Text>Open up App.js to start working on your app!</Text>
-        <Text>Changes you make will automatically reload.</Text>
-        <Text>Shake your phone to open the developer menu.</Text>
+        <Text style={styles.text}>
+          Enter your bus route number to display buses near you.
+        </Text>
+        <TextInput
+          style={{height: 40, width: 100}}
+          placeholder="Route Number"
+          onChangeText={(text) => this.setState({text})}
+        />
+        <Button
+          onPress={stub}
+          title="N"
+          color="#841584"
+          accessibilityLabel="Learn less about this green button"
+        />
       </View>
     );
+
   }
 }
 
@@ -19,5 +39,15 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     alignItems: 'center',
     justifyContent: 'center',
+    margin: 0,
+
   },
+  text: {
+    fontSize: 16,
+    fontWeight: '400',
+    //lineHeight: 1.5,
+    color: '#212529',
+    height: 40
+    //textAlign: 'left'
+  }
 });
