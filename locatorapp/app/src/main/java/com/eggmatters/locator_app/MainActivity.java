@@ -8,6 +8,7 @@ import android.widget.EditText;
 
 public class MainActivity extends AppCompatActivity {
     public static final String EXTRA_MESSAGE = "com.eggmatters.locator_app.MESSAGE";
+    public static final String EGGMATTERS_COM = "https://www.google.com";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
