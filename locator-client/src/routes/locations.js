@@ -48,7 +48,7 @@ module.exports = locations;
 
 function httpPushRequest(payload) {
    //have to be linked
-   var url = 'http://172.21.0.3:8080';
+   var url = 'http://172.20.0.1:8080';
 
    return request({
       method: 'POST',
