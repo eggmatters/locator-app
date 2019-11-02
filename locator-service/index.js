@@ -14,8 +14,10 @@ const requestHandler = (request, response) => {
    let body = [],
        routeNumber = {};
    request.on('data', (chunk) => {
+     console.log("Got here!B");
      body.push(chunk);
    }).on('end', () => {
+    try {
       body = Buffer.concat(body).toString();
       var routeNumber = JSON.parse(body),
           routesService = new service(routeNumber.route),
@@ -27,6 +29,10 @@ const requestHandler = (request, response) => {
           response.end(resp);
         });
       });
+    } catch (e) {
+      console.log(e);
+      response.end();
+    }
    });
 };
 
@@ -37,5 +43,5 @@ server.listen(port, (err) => {
     return console.log('something bad happened', err);
   }
 
-  console.log(`server is listening on ${port}`);
+  console.log(`server is listening locally on ${port}`);
 });

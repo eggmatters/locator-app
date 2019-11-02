@@ -69,6 +69,7 @@ BusFinderService.prototype = {
          return;
        }
        var message = (typeof resolve === 'string') ? resolve : JSON.stringify(resolve);
+
        if (timeToLive) {
          self.queues.setSyncQueue(self.syncQueue, Date.now().toString(), timeToLive);
        }
