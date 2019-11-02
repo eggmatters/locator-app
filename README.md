@@ -1,6 +1,6 @@
 # Locator Service
 
-The locator Service is a working web application to show real time bus positions 
+The locator Service is a working web application to show real time bus positions
 for the Portland Tri-Met system.
 
 The web application consists of a simple form for an existing TriMet Route. The form submission
@@ -20,21 +20,21 @@ There are 3 services this app utilizes:
 Provided by https://developers.arcgis.com/ This is a free service which provides Javascript API's
 to access most of the features of ArcGIS software in a robust web application environment.
 
-This application loads a 2-dimensional map, rendering the user's position location and 
+This application loads a 2-dimensional map, rendering the user's position location and
 the locations of buses on the selected route with popup legends for each bus on the line showing
 additional details
 
 ## Tri Met
 
-Provided by https://developer.trimet.org/ Tri Met offers a rich API for fetching real-time 
+Provided by https://developer.trimet.org/ Tri Met offers a rich API for fetching real-time
 tranist data. While Tri Met does supply KMS (GIS Layer data) files, the endpoint chosen
 for this application returns JSON providing details for each bus (namely, lat & long coordinates)
 
 ## Location Service Engine
 
-This is a service to provide a real-time conduit for transit data. This service reads from a 
+This is a service to provide a real-time conduit for transit data. This service reads from a
 Redis Message queue and makes API calls to the Trim-Met service, posting the results on
-a resulting queue. 
+a resulting queue.
 
 The client can monitor the queue and force updates at specified intervals.
 
@@ -75,9 +75,9 @@ Once initiated, the client will wait on reads from the queue. The locator servic
 make an api calls to the TriMet api on any incoming queue messages. These payloads shall
 then be written to the outbound queue for consumption by clients.
 
-The web-client may then establish a socket.io session with the requestor, maintaining 
-real-time updates of locations at some specified interval. Ideally a seamless re-rendering 
-of the locations view layer will occur. 
+The web-client may then establish a socket.io session with the requestor, maintaining
+real-time updates of locations at some specified interval. Ideally a seamless re-rendering
+of the locations view layer will occur.
 
 # Future Enhancements
 
@@ -85,3 +85,10 @@ of the locations view layer will occur.
 * Additional Service integrations (nearest Stop, Arrival times, etc)
 * Enhanced view features (icons for locations, etc.)
 * Port to react-native as an application experience.
+
+# Docker Cheatsheet
+```
+docker-compose up --build
+docker container ps
+docker exec -it 8f433ec8160d bash
+docker service rm $(docker service ls -q)

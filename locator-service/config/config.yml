@@ -3,7 +3,7 @@ api:
   app_id: CBA9612C200C0877AA9EC1949
 
 redis:
-  ip: 172.21.0.1
+  ip: 172.18.0.2
   sync_queue: "locator-sync:"
   publish_queue: "locator-publish:"
   data_queue: "locator-data:"
