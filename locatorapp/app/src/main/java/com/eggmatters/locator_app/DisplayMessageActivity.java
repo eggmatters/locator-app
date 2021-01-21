@@ -40,11 +40,15 @@ public class DisplayMessageActivity extends AppCompatActivity {
             }
         });
 
-        String payload = "bus_number=" + URLEncoder.encode("76");
-        //myWebView.postUrl("http://127.0.1.5/fetch", payload.getBytes());
+        String payload = "bus_number=" + URLEncoder.encode("94");
+        String posturl = "http://172.18.0.4:3000/locator/fetch";
+        String getUrl = "http://172.18.0.4:3000";
+        //myWebView.postUrl(posturl, payload.getBytes());
+        myWebView.loadUrl(getUrl);
         //myWebView.postUrl("http://localhost:3000/locator/fetch", payload.getBytes());
-        myWebView.postUrl(MainActivity.EGGMATTERS_COM, payload.getBytes() );
+        //myWebView.postUrl(MainActivity.EGGMATTERS_COM, payload.getBytes() );
         //2019-03-14 07:01:07.931 20606-20606/com.eggmatters.locator_app I/chromium:
         // [INFO:CONSOLE(23)] "ERROR(1): Only secure origins are allowed (see: https://goo.gl/Y0ZkNV).", source: http://10.0.2.2:3000/js/esri.js (23)
     }
 }
+//docker inspect -f '{{range .NetworkSettings.Networks}}{{.IPAddress}}{{end}}' 9a1768a7e847
