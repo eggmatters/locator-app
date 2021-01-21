@@ -23,9 +23,20 @@ function error(err) {
   console.warn(`ERROR(${err.code}): ${err.message}`);
 }
 
-navigator.geolocation.getCurrentPosition(success, error, options);
+var devcoords = {
+    coords: {
+        longitude: -122.77611789999999,
+        latitude: 45.422176199999996
+    }
+}
+
+
+success(devcoords);
+
+//navigator.geolocation.getCurrentPosition(success, error, options);
 
 function renderMap(origin) {
+    //alert("Got here!")
    require([
       "esri/Map",
       "esri/views/MapView",
