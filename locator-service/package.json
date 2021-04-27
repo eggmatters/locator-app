@@ -10,7 +10,7 @@
     "bluebird": "^3.7.2",
     "js-yaml": "^3.14.1",
     "nodemon": "^1.19.4",
-    "redis": "^2.8.0",
+    "redis": "^3.1.1",
     "request": "^2.88.2",
     "request-promise": "^4.2.6"
   },
