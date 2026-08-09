@@ -1,24 +1,21 @@
 var expect  = require('chai').expect,
     assert  = require('chai').assert,
     queues  = require('../src/queues'),
-    fs      = require('fs'),
-    yaml    = require('js-yaml'),
     redis   = require('redis'),
     sinon   = require('sinon');
-    Promise = require('bluebird');
-    events  = require('events');
-
-var falsePromise = function() {
-   return new Promise( function(resolve, reject) {
-      resolve({ message: "TEST MESSAGE" });
-   });
-};
 
 describe ( 'queues module test', () => {
    let testQueue;
    before( () => {
-      sinon.stub(redis, 'createClient').returns({});
+      sinon.stub(redis, 'createClient').returns({
+         on: () => {},
+         connect: () => Promise.resolve()
+      });
       testQueue = new queues('syncQueue','messageQueue' );
+   });
+
+   after( () => {
+      redis.createClient.restore();
    });
 
    it ("Should create a Redis Client", () => {
@@ -30,4 +27,3 @@ describe ( 'queues module test', () => {
    });
 
 });
-

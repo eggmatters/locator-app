@@ -1,16 +1,22 @@
 var fs      = require('fs'),
     yaml    = require('js-yaml'),
-    redis   = require('redis'),
-    Promise = require('bluebird');
+    redis   = require('redis');
 
-const config = yaml.safeLoad(fs.readFileSync('./config/config.yml', 'utf8'));
+const config = yaml.load(fs.readFileSync('./config/config.yml', 'utf8'));
 
 var Queues = function() {
 
    this.client = redis.createClient({
-      'scheme': 'tcp',
-      'host': config.redis.ip,
-      'port': 6379
+      socket: {
+         host: config.redis.ip,
+         port: 6379
+      }
+   });
+   this.client.on("error", function (err) {
+     console.log("RedisClient Error:", err);
+   });
+   this.client.connect().catch((err) => {
+     console.log("RedisClient Connect Error:", err);
    });
    this.dataQueue = config.redis.data_queue;
    this.subscribe = config.redis.publish_queue;

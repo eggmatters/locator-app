@@ -2,17 +2,17 @@ var fs      = require('fs'),
     yaml    = require('js-yaml'),
     redis   = require('redis'),
     events  = require('events');
-    Promise = require('bluebird');
 
-const config = yaml.safeLoad(fs.readFileSync('./config/config.yml', 'utf8'));
+const config = yaml.load(fs.readFileSync('./config/config.yml', 'utf8'));
 class QueueEvents extends events {};
 
 var Queues = function() {
 
    this.client = redis.createClient({
-      'scheme': 'tcp',
-      'host': config.redis.ip,
-      'port': 6379
+      socket: {
+         host: config.redis.ip,
+         port: 6379
+      }
    });
    this.queueEvents = new QueueEvents();
 
@@ -26,12 +26,15 @@ var Queues = function() {
    this.client.on("error", function (err) {
      console.log("RedisClient Error:", err);
    });
+   this.client.connect().catch((err) => {
+     console.log("RedisClient Connect Error:", err);
+   });
 };
 
 Queues.prototype = {
   /**
    *
-   * @returns {RedisClient}
+   * @returns {RedisClientType}
    */
    getClient: function() {
       return this.client;
@@ -58,13 +61,11 @@ Queues.prototype = {
     */
    setSyncQueue: function(syncQueue, message, timeToLive) {
      var self = this;
-     this.client.set(syncQueue, message, 'EX', timeToLive, 'NX', (err, resp) => {
-       if (err) {
-         console.log("SetSyncQueue Error", err);
-         return;
-       }
+     return this.client.set(syncQueue, message, { EX: timeToLive, NX: true }).then((resp) => {
        console.log("Response from sync queue? (should be 'OK'):", resp);
        self.queueEvents.emit(self.events.sync_queue_set);
+     }).catch((err) => {
+       console.log("SetSyncQueue Error", err);
      });
    },
    /**
@@ -78,15 +79,10 @@ Queues.prototype = {
     */
    publishQueueMessage: function(messageQueue, message) {
      var self = this;
-     return new Promise(function(resolve, reject) {
-       self.client.publish(messageQueue, message, (err, resp) => {
-         if (err) {
-           console.log(err);
-           reject(err);
-         }
-         self.queueEvents.emit(self.events.published_to_queue);
-         resolve();
-       });
+     return this.client.publish(messageQueue, message).then(() => {
+       self.queueEvents.emit(self.events.published_to_queue);
+     }).catch((err) => {
+       console.log(err);
      });
    },
 
@@ -99,15 +95,10 @@ Queues.prototype = {
     */
    setQueueData: function(messageQueue, message) {
      var self = this;
-     return new Promise(function (resolve, reject) {
-       self.client.set(messageQueue, message, (err, resp) => {
-         if (err) {
-           console.log(err);
-           reject(err);
-         }
-         self.queueEvents.emit(self.events.data_queue_set);
-         resolve();
-       });
+     return this.client.set(messageQueue, message).then(() => {
+       self.queueEvents.emit(self.events.data_queue_set);
+     }).catch((err) => {
+       console.log(err);
      });
    },
 
@@ -117,30 +108,32 @@ Queues.prototype = {
     */
    isQueueExpired: function(queue) {
      var self = this;
-     this.client.exists(queue, (err, resp) => {
-       if (err || resp <= 0) {
+     return this.client.exists(queue).then((resp) => {
+       if (resp <= 0) {
          self.queueEvents.emit(self.events.sync_queue_expired);
        }
-     })
+     }).catch(() => {
+       self.queueEvents.emit(self.events.sync_queue_expired);
+     });
    },
 
-   pushQueueMessage: function(messageQueue, message) {
-      var messageId = this.client.incr(messageQueue);
+   pushQueueMessage: async function(messageQueue, message) {
+      var messageId = await this.client.incr(messageQueue);
       var payload = {
          'message': message,
-         'id': messageId
+         'id': messageId.toString()
       };
-      this.client.hmset(messageQueue + ':' + messageId, payload);
-      this.client.lpush('queue:' + messageQueue, messageId);
+      await this.client.hSet(messageQueue + ':' + messageId, payload);
+      await this.client.lPush('queue:' + messageQueue, messageId.toString());
    },
 
-   fetchMessages: function(messageQueue) {
+   fetchMessages: async function(messageQueue) {
       var messages = [];
-      var messageIds = this.blpop('queue:' + messageQueue, 0) || [];
-
-      messageIds.forEach( (messageId) => {
-         messages.push(this.hgetall(messageQueue + ':' + messageId));
-      });
+      var result = await this.client.blPop('queue:' + messageQueue, 0);
+      if (result) {
+         messages.push(await this.client.hGetAll(messageQueue + ':' + result.element));
+      }
+      return messages;
    }
 };
 

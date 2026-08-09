@@ -1,13 +1,8 @@
-var request = require('request-promise'),
-    fs      = require('fs'),
+var fs      = require('fs'),
     yaml    = require('js-yaml'),
-    queues  = require('../src/queues'),
-    Promise = require('bluebird');
+    queues  = require('../src/queues');
 
-//Promise.promisifyAll(redis.RedisClient.prototype);
-//Promise.promisifyAll(redis.Multi.prototype);
-
-const config = yaml.safeLoad(fs.readFileSync('./config/config.yml', 'utf8'));
+const config = yaml.load(fs.readFileSync('./config/config.yml', 'utf8'));
 const url = config.api.base + 'routes/';
 
 /**
@@ -15,7 +10,7 @@ const url = config.api.base + 'routes/';
  *
  * @param {string} route
  */
-BusFinderService = function(route) {
+var BusFinderService = function(route) {
    this.route = route;
    this.syncQueue = config.redis.sync_queue + route;
    this.publishQueue = config.redis.publish_queue + route;
@@ -53,8 +48,7 @@ BusFinderService.prototype = {
     */
    getRoutes: function() {
       var appUrl = url + this.route + '/appID/' + config.api.app_id;
-      var rv = request.get(appUrl);
-      return rv;
+      return fetch(appUrl).then((response) => response.text());
    },
 
    /**
