@@ -9,7 +9,7 @@ var options = {
 };
 var socketEvents = new Events();
 
-var socket = io();
+var socket = io({ query: { route: routeNumber } });
 
 socket.on('locations', function(locations) {
    data = { locations: locations, pgs: pointGraphics };
@@ -19,21 +19,25 @@ socket.on('locations', function(locations) {
 function success(pos) {
   renderMap(pos.coords);
 }
-function error(err) {
-  console.warn(`ERROR(${err.code}): ${err.message}`);
-}
 
-var devcoords = {
+// Used when geolocation is unavailable or the user denies permission.
+var fallbackCoords = {
     coords: {
         longitude: -122.77611789999999,
         latitude: 45.422176199999996
     }
+};
+
+function error(err) {
+  console.warn(`ERROR(${err.code}): ${err.message}`);
+  success(fallbackCoords);
 }
 
-
-success(devcoords);
-
-//navigator.geolocation.getCurrentPosition(success, error, options);
+if (navigator.geolocation) {
+  navigator.geolocation.getCurrentPosition(success, error, options);
+} else {
+  success(fallbackCoords);
+}
 
 function renderMap(origin) {
     //alert("Got here!")

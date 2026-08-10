@@ -30,7 +30,7 @@ var TestHelper = function () {
         app.use(bodyParser.json());
         app.use(bodyParser.urlencoded({extended:true}));
         app.use(function(req, resp, next) {
-           resp.io = { emit: function() {} };
+           resp.io = { emit: function() {}, to: function() { return { emit: function() {} }; } };
            next();
         });
         app.use(endpoint, route);

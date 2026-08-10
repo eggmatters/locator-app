@@ -47,7 +47,7 @@ BusFinderService.prototype = {
     * @returns {Promise}
     */
    getRoutes: function() {
-      var appUrl = url + this.route + '/appID/' + config.api.app_id;
+      var appUrl = url + this.route + '/appID/' + process.env.TRIMET_API_KEY;
       return fetch(appUrl).then((response) => response.text());
    },
 
