@@ -4,7 +4,7 @@ var fs      = require('fs');
 
 
 var TestHelper = function () {
-   const config = yaml.load(fs.readFileSync('./config/config.yml', 'utf8'));
+   const config = yaml.load(fs.readFileSync('./config/config.yaml', 'utf8'));
 
    /**
      * Establishes an Express application instance for segregated calls

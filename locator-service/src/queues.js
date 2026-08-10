@@ -3,7 +3,7 @@ var fs      = require('fs'),
     redis   = require('redis'),
     events  = require('events');
 
-const config = yaml.load(fs.readFileSync('./config/config.yml', 'utf8'));
+const config = yaml.load(fs.readFileSync('./config/config.yaml', 'utf8'));
 class QueueEvents extends events {};
 
 var Queues = function() {

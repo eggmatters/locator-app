@@ -2,7 +2,7 @@ var fs      = require('fs'),
     yaml    = require('js-yaml'),
     queues  = require('../src/queues');
 
-const config = yaml.load(fs.readFileSync('./config/config.yml', 'utf8'));
+const config = yaml.load(fs.readFileSync('./config/config.yaml', 'utf8'));
 const url = config.api.base + 'routes/';
 
 /**

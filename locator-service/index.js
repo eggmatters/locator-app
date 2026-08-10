@@ -8,7 +8,7 @@ if (!process.env.TRIMET_API_KEY) {
   process.exit(1);
 }
 
-const config = yaml.load(fs.readFileSync('./config/config.yml', 'utf8')),
+const config = yaml.load(fs.readFileSync('./config/config.yaml', 'utf8')),
       //client = (new queues()).getClient(),
       port = 8080,
       timeToLive = 300, //seconds for REDIS expiry
