@@ -1,0 +1,14 @@
+api:
+  base: https://developer.trimet.org/ws/v2/vehicles/
+  app_id: CBA9612C200C0877AA9EC1949
+
+redis:
+  ip: 172.18.0.2
+  sync_queue: "locator-sync:"
+  publish_queue: "locator-publish:"
+  data_queue: "locator-data:"
+
+  publish_states:
+    queue_started: "queue started"
+    message_published: "message published"
+    queue_expired: "queue expired"
