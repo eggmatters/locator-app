@@ -1,16 +1,13 @@
 var testHelper = require('./testHelper'),
-    Promise    = require('bluebird'),
     chai       = require('chai'),
     chaiHttp   = require('chai-http'),
     assert     = require('chai').assert,
     expect     = require('chai').expect,
-    should     = require('chai').should;
+    should     = require('chai').should,
     sinon      = require('sinon');
 
 chai.use(chaiHttp);
 
-//Ensure that chai.request returns promises.
-Promise.promisifyAll(chai.request);
 function doSomething() {
 
 }

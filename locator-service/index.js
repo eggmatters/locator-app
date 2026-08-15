@@ -1,10 +1,14 @@
 var  service = require('./src/service'),
       yaml   = require('js-yaml'),
       fs     = require('fs'),
-      http   = require('http'),
-      Promise = require('bluebird');
+      http   = require('http');
 
-const config = yaml.safeLoad(fs.readFileSync('./config/config.yml', 'utf8')),
+if (!process.env.TRIMET_API_KEY) {
+  console.error('TRIMET_API_KEY is not set. Export it before starting the service.');
+  process.exit(1);
+}
+
+const config = yaml.load(fs.readFileSync('./config/config.yaml', 'utf8')),
       //client = (new queues()).getClient(),
       port = 8080,
       timeToLive = 300, //seconds for REDIS expiry
@@ -14,7 +18,6 @@ const requestHandler = (request, response) => {
    let body = [],
        routeNumber = {};
    request.on('data', (chunk) => {
-     console.log("Got here!B");
      body.push(chunk);
    }).on('end', () => {
     try {
@@ -25,8 +28,11 @@ const requestHandler = (request, response) => {
       routesService.queueDebug();
       routesService.initiateQueuesWithRetry(timeToLive, retryTimeout);
       routesServiceQueues.getEventHandler().on(routesServiceQueues.getEvents().data_queue_set, () => {
-        routesServiceQueues.getClient().get(config.redis.data_queue + routeNumber.route, function (err, resp) {
+        routesServiceQueues.getClient().get(config.redis.data_queue + routeNumber.route).then((resp) => {
           response.end(resp);
+        }).catch((err) => {
+          console.log(err);
+          response.end();
         });
       });
     } catch (e) {

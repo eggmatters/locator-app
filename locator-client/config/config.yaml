@@ -1,0 +1,13 @@
+api:
+  base: https://developer.trimet.org/ws/v2/vehicles/
+
+redis:
+  ip: redis
+  sync_queue: "locator-sync:"
+  publish_queue: "locator-publish:"
+  data_queue: "locator-data:"
+
+  publish_states:
+    queue_started: "queue started"
+    message_published: "message published"
+    queue_expired: "queue expired"

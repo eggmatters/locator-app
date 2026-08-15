@@ -1,11 +1,10 @@
 var path    = require('path');
 var yaml    = require('js-yaml');
-var Promise = require('bluebird');
-var fs      = Promise.promisifyAll(require('fs'));
+var fs      = require('fs');
 
 
 var TestHelper = function () {
-   const config = yaml.safeLoad(fs.readFileSync('./config/config.yml', 'utf8'));
+   const config = yaml.load(fs.readFileSync('./config/config.yaml', 'utf8'));
 
    /**
      * Establishes an Express application instance for segregated calls
@@ -30,6 +29,10 @@ var TestHelper = function () {
         var app = express();
         app.use(bodyParser.json());
         app.use(bodyParser.urlencoded({extended:true}));
+        app.use(function(req, resp, next) {
+           resp.io = { emit: function() {}, to: function() { return { emit: function() {} }; } };
+           next();
+        });
         app.use(endpoint, route);
         app.use(error);
         app.set('view engine', 'ejs');

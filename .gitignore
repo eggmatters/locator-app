@@ -7,3 +7,4 @@ locator-client/nbproject
 .tern-project
 xde
 /locator-client/src/nbproject/private/
+*.pem

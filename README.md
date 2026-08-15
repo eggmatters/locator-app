@@ -45,6 +45,13 @@ See integration notes below.
 
 # Installation
 
+`locator-service` calls the TriMet API, which requires an app ID. Get one from
+https://developer.trimet.org/ and export it before starting the service (locally or via Docker):
+
+```
+$ export TRIMET_API_KEY=your-trimet-app-id
+```
+
 ## Locally
 
 from both `locator-client` & `locator-service` directories, run
@@ -61,7 +68,8 @@ $ npm run start
 
 ## Docker container build
 
-Run `$ docker-compose up --build` from the top-level directory.
+Run `$ docker-compose up --build` from the top-level directory. `TRIMET_API_KEY` must be
+exported in your shell first — docker-compose reads it from the environment.
 
 From either installation, navigate to `localhost:3000` in your browser.
 

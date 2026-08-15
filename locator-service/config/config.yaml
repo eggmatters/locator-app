@@ -1,0 +1,14 @@
+api:
+  base: https://developer.trimet.org/ws/v2/vehicles/
+  # app_id is a secret; it's read from the TRIMET_API_KEY env var (see src/service.js), never checked in here.
+
+redis:
+  ip: redis
+  sync_queue: "locator-sync:"
+  publish_queue: "locator-publish:"
+  data_queue: "locator-data:"
+
+  publish_states:
+    queue_started: "queue started"
+    message_published: "message published"
+    queue_expired: "queue expired"

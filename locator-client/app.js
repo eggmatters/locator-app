@@ -7,6 +7,16 @@ var express = require('express'),
 
 var port    = 3000;
 
+// Join each socket to a room named after the route it's displaying, so
+// 'locations' updates only reach clients watching that specific route
+// instead of being broadcast to every connected client.
+io.on('connection', function(socket) {
+   var route = socket.handshake.query.route;
+   if (route) {
+      socket.join(route);
+   }
+});
+
 //Site setup, rendering engine, middleware & routes:
 app.use(express.static('public'));
 //Expose io via middleware (?)

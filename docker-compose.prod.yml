@@ -6,12 +6,12 @@ services:
     image: locator-service
     ports:
       - 8080:8080
-    volumes:
-      - ./locator-service:/app/locator-service
+    command: node index.js
     environment:
       - TRIMET_API_KEY=${TRIMET_API_KEY}
     links:
       - redis
+    restart: unless-stopped
 
   locator-client:
     build:
@@ -20,11 +20,11 @@ services:
     image: locator-client
     ports:
       - 3000:3000
-    volumes:
-      - ./locator-client:/app/locator-client
+    command: node app.js
     links:
       - redis
       - locator-service
+    restart: unless-stopped
 
   redis:
     image: redis
@@ -33,3 +33,4 @@ services:
       - ./redis.conf:/usr/local/etc/redis/redis.conf
     ports:
       - 6379:6379
+    restart: unless-stopped
