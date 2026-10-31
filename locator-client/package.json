@@ -15,7 +15,7 @@
     "node": ">=20"
   },
   "dependencies": {
-    "body-parser": "^2.3.0",
+    "body-parser": "^2.4.0",
     "cookie": "^0.7.2",
     "ejs": "^6.0.1",
     "express": "^4.21.2",
